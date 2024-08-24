@@ -21,6 +21,10 @@
     </select>
     <button onclick="loadPractice()">Load Practice</button>
 
+    
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js"></script>
     <script>
@@ -35,8 +39,6 @@
             measurementId: "G-V7B3T8GG34"
         };
 
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
 
         // Populate the listSelect with data from Firebase
         window.onload = function() {
