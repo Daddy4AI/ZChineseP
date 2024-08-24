@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Lists</title>
+</head>
+<body>
+    <h1>Word Lists</h1>
+    <select id="listSelect">
+        <!-- Options will be dynamically populated -->
+    </select>
+    <select id="categorySelect">
+        <option value="all">All Categories</option>
+        <option value="1">生字</option>
+        <option value="2">生詞</option>
+    </select>
+    <select id="sortOrderSelect">
+        <option value="normal">Normal</option>
+        <option value="random">Random</option>
+    </select>
+    <button onclick="loadPractice()">Load Practice</button>
+
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoyZelymQJvY13J6SVph46E0UcajCRubw",
+            authDomain: "chineselists.firebaseapp.com",
+            databaseURL: "https://chineselists-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "chineselists",
+            storageBucket: "chineselists.appspot.com",
+            messagingSenderId: "149825999355",
+            appId: "1:149825999355:web:f1478a5e019df1b21bbb5e",
+            measurementId: "G-V7B3T8GG34"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Populate the listSelect with data from Firebase
+        window.onload = function() {
+            const listSelect = document.getElementById('listSelect');
+            database.ref('WordLists').once('value', snapshot => {
+                snapshot.forEach(childSnapshot => {
+                    const option = document.createElement('option');
+                    option.value = childSnapshot.key;
+                    option.textContent = childSnapshot.val().list_name;
+                    listSelect.appendChild(option);
+                });
+            });
+        };
+
+        function loadPractice() {
+            const listId = document.getElementById('listSelect').value;
+            const category = document.getElementById('categorySelect').value;
+            const sortOrder = document.getElementById('sortOrderSelect').value;
+            window.location.href = `practice.html?listId=${listId}&category=${category}&sortOrder=${sortOrder}`;
+        }
+    </script>
+</body>
+</html>
