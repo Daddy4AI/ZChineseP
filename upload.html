@@ -18,46 +18,53 @@
             color: white;
             line-height: 20px;
         }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: gray;
+        }
     </style>
 </head>
 <body>
     <h1>Upload CSV Files to Firebase</h1>
 
-    <h2>Upload WordLists.csv</h2>
+    <h2>Upload Word Lists</h2>
     <input type="file" id="wordListsFileInput" accept=".csv">
-    <button onclick="uploadWordLists()">Upload Word Lists</button>
+    <button onclick="uploadCSVFile('WordLists', 'wordListsProgress', 'wordListsStatus')">Upload Word Lists</button>
     <div class="progress-container">
         <div id="wordListsProgress" class="progress-bar"></div>
     </div>
     <p id="wordListsStatus"></p>
 
-    <h2>Upload Categories.csv</h2>
+    <h2>Upload Categories</h2>
     <input type="file" id="categoriesFileInput" accept=".csv">
-    <button onclick="uploadCategories()">Upload Categories</button>
+    <button onclick="uploadCSVFile('Categories', 'categoriesProgress', 'categoriesStatus')">Upload Categories</button>
     <div class="progress-container">
         <div id="categoriesProgress" class="progress-bar"></div>
     </div>
     <p id="categoriesStatus"></p>
 
-    <h2>Upload Words.csv</h2>
+    <h2>Upload Words</h2>
     <input type="file" id="wordsFileInput" accept=".csv">
-    <button onclick="uploadWords()">Upload Words</button>
+    <button onclick="uploadCSVFile('Words', 'wordsProgress', 'wordsStatus')">Upload Words</button>
     <div class="progress-container">
         <div id="wordsProgress" class="progress-bar"></div>
     </div>
     <p id="wordsStatus"></p>
 
+    <!-- Footer with version information -->
     <footer>
         Version 0001
     </footer>
 
-    
     <!-- Load Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js"></script>
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-database.js";
 
-    <script>
-        // Initialize Firebase
+        // Initialize Firebase with your configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAoyZelymQJvY13J6SVph46E0UcajCRubw",
             authDomain: "chineselists.firebaseapp.com",
@@ -69,8 +76,8 @@
             measurementId: "G-V7B3T8GG34"
         };
 
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
         function updateProgressBar(progressBarId, percentage) {
             const progressBar = document.getElementById(progressBarId);
@@ -78,7 +85,8 @@
             progressBar.textContent = percentage + '%';
         }
 
-        function uploadCSVFile(fileInput, refPath, progressBarId, statusId) {
+        function uploadCSVFile(refPath, progressBarId, statusId) {
+            const fileInput = document.getElementById(refPath.toLowerCase() + 'FileInput');
             const file = fileInput.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -92,42 +100,38 @@
                         if (index === 0 || line.trim() === '') return;
                         const values = line.split(',');
                         const entry = {};
-                        values.forEach((value, i) => {
-                            entry[Object.keys(refPath)[i]] = value.trim();
-                        });
-                        database.ref(refPath.path + '/' + values[0].trim()).set(entry, (error) => {
+
+                        if (refPath === 'WordLists') {
+                            entry['list_id'] = values[0].trim();
+                            entry['list_name'] = values[1].trim();
+                        } else if (refPath === 'Categories') {
+                            entry['category_id'] = values[0].trim();
+                            entry['category_name'] = values[1].trim();
+                        } else if (refPath === 'Words') {
+                            entry['word_id'] = values[0].trim();
+                            entry['word_text'] = values[1].trim();
+                            entry['list_id'] = values[2].trim();
+                            entry['category_id'] = values[3].trim();
+                        }
+
+                        const dbRef = ref(database, refPath + '/' + values[0].trim());
+                        set(dbRef, entry).then(() => {
                             processedLines++;
                             const percentage = Math.round((processedLines / totalLines) * 100);
                             updateProgressBar(progressBarId, percentage);
 
                             if (processedLines === totalLines) {
-                                document.getElementById(statusId).textContent = error ? 
-                                    'Upload failed: ' + error.message : 
-                                    'Upload complete for ' + refPath.name;
+                                document.getElementById(statusId).textContent = 'Upload complete for ' + refPath;
                             }
+                        }).catch((error) => {
+                            document.getElementById(statusId).textContent = 'Upload failed: ' + error.message;
                         });
                     });
                 };
                 reader.readAsText(file);
+            } else {
+                alert('Please select a file first.');
             }
-        }
-
-        function uploadWordLists() {
-            const fileInput = document.getElementById('wordListsFileInput');
-            const refPath = { path: 'WordLists', name: 'Word Lists', list_id: 'list_id', list_name: 'list_name' };
-            uploadCSVFile(fileInput, refPath, 'wordListsProgress', 'wordListsStatus');
-        }
-
-        function uploadCategories() {
-            const fileInput = document.getElementById('categoriesFileInput');
-            const refPath = { path: 'Categories', name: 'Categories', category_id: 'category_id', category_name: 'category_name' };
-            uploadCSVFile(fileInput, refPath, 'categoriesProgress', 'categoriesStatus');
-        }
-
-        function uploadWords() {
-            const fileInput = document.getElementById('wordsFileInput');
-            const refPath = { path: 'Words', name: 'Words', word_id: 'word_id', word_text: 'word_text', list_id: 'list_id', category_id: 'category_id' };
-            uploadCSVFile(fileInput, refPath, 'wordsProgress', 'wordsStatus');
         }
     </script>
 </body>
