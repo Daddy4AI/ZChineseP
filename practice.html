@@ -79,56 +79,64 @@
         const voiceSelect = document.getElementById('voiceSelect');
 
         function populateVoiceList() {
-            const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
-            voices.forEach((voice, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${voice.name} (${voice.lang})`;
-                voiceSelect.appendChild(option);
-            });
+    const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
+    console.log('Available voices:', voices); // Debugging line
+    voiceSelect.innerHTML = ''; // Clear previous options
+    voices.forEach((voice, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        voiceSelect.appendChild(option);
+    });
+}
+
+function playWord() {
+    if (words.length > 0 && words[currentIndex]) {
+        const wordText = words[currentIndex].word_text;
+        wordDisplay.textContent = wordText;
+
+        const utterance = new SpeechSynthesisUtterance(wordText);
+        const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            console.log('Selected voice:', selectedVoice); // Debugging line
+        } else {
+            console.warn('No voice selected'); // Debugging line
         }
+        utterance.lang = 'zh-TW';
+        console.log('Speaking:', wordText); // Debugging line
+        speechSynthesis.speak(utterance);
+    } else {
+        wordDisplay.textContent = "No words available";
+        console.warn('No words available to speak'); // Debugging line
+    }
+}
 
-        function playWord() {
-            if (words.length > 0 && words[currentIndex]) {
-                const wordText = words[currentIndex].word_text;
-                wordDisplay.textContent = wordText;
-
-                const utterance = new SpeechSynthesisUtterance(wordText);
-                const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
-                }
-                utterance.lang = 'zh-TW';
-                speechSynthesis.speak(utterance);
-            } else {
-                wordDisplay.textContent = "No words available";
-            }
-        }
-
-        document.getElementById('prevButton').addEventListener('click', () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                playWord();
-            }
-        });
-
-        document.getElementById('repeatButton').addEventListener('click', () => {
-            playWord();
-        });
-
-        document.getElementById('nextButton').addEventListener('click', () => {
-            if (currentIndex < words.length - 1) {
-                currentIndex++;
-                playWord();
-            }
-        });
-
-        // Load voices and play the first word
-        populateVoiceList();
-        if (typeof speechSynthesis !== 'undefined') {
-            speechSynthesis.onvoiceschanged = populateVoiceList;
-        }
+document.getElementById('prevButton').addEventListener('click', () => {
+    if (currentIndex > 0) {
+        currentIndex--;
         playWord();
+    }
+});
+
+document.getElementById('repeatButton').addEventListener('click', () => {
+    playWord();
+});
+
+document.getElementById('nextButton').addEventListener('click', () => {
+    if (currentIndex < words.length - 1) {
+        currentIndex++;
+        playWord();
+    }
+});
+
+// Load voices and play the first word
+populateVoiceList();
+if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.onvoiceschanged = populateVoiceList;
+}
+playWord();
+
     </script>
 </body>
 </html>
