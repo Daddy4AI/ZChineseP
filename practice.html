@@ -25,7 +25,7 @@
         }
 
         .word-container h2 {
-            font-size: 2em;
+            font-size: 1.5em;
             margin-bottom: 10px;
         }
 
@@ -36,6 +36,11 @@
         .controls {
             display: flex;
             gap: 20px;
+        }
+
+        button {
+            font-size: 2em;
+            padding: 10px 20px;
         }
 
         footer {
@@ -63,9 +68,9 @@
     </div>
 
     <div class="controls">
-        <button id="prevButton">Previous</button>
-        <button id="repeatButton">Repeat</button>
-        <button id="nextButton">Next</button>
+        <button id="prevButton">上一个</button>
+        <button id="repeatButton">重复</button>
+        <button id="nextButton">下一个</button>
     </div>
 
     <footer>
@@ -79,72 +84,66 @@
         const voiceSelect = document.getElementById('voiceSelect');
 
         function populateVoiceList() {
-    const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
-    
-    if (voices.length === 0) {
-        console.warn('No Chinese voices available');
-        voiceSelect.innerHTML = '<option>No Chinese voices available</option>';
-    } else {
-        console.log('Available voices:', voices);
-        voiceSelect.innerHTML = ''; // Clear previous options
-        voices.forEach((voice, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = `${voice.name} (${voice.lang})`;
-            voiceSelect.appendChild(option);
-        });
-    }
-}
+            const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
+            voiceSelect.innerHTML = ''; // Clear previous options
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
 
-function playWord() {
-    if (words.length > 0 && words[currentIndex]) {
-        const wordText = words[currentIndex].word_text;
-        wordDisplay.textContent = wordText;
-
-        const utterance = new SpeechSynthesisUtterance(wordText);
-        const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
-        const selectedVoice = voices[voiceSelect.value];
-        if (selectedVoice) {
-            utterance.voice = selectedVoice;
-            console.log('Selected voice:', selectedVoice);
-        } else {
-            console.warn('No valid Chinese voice selected');
+            // Set default voice to Chinese (Mainland China)
+            const defaultVoice = voices.find(voice => voice.lang === 'zh-CN');
+            if (defaultVoice) {
+                voiceSelect.value = voices.indexOf(defaultVoice);
+            }
         }
-        utterance.lang = 'zh-TW';
-        console.log('Speaking:', wordText);
-        speechSynthesis.speak(utterance);
-    } else {
-        wordDisplay.textContent = "No words available";
-        console.warn('No words available to speak');
-    }
-}
 
-document.getElementById('prevButton').addEventListener('click', () => {
-    if (currentIndex > 0) {
-        currentIndex--;
+        function playWord() {
+            if (words.length > 0 && words[currentIndex]) {
+                const wordText = words[currentIndex].word_text;
+                const utterance = new SpeechSynthesisUtterance(wordText);
+                const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.8; // Set playrate to 0.8
+
+                const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
+                wordDisplay.textContent = wordInfo;
+
+                speechSynthesis.speak(utterance);
+            } else {
+                wordDisplay.textContent = "No words available";
+            }
+        }
+
+        document.getElementById('prevButton').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                playWord();
+            }
+        });
+
+        document.getElementById('repeatButton').addEventListener('click', () => {
+            playWord();
+        });
+
+        document.getElementById('nextButton').addEventListener('click', () => {
+            if (currentIndex < words.length - 1) {
+                currentIndex++;
+                playWord();
+            }
+        });
+
+        // Load voices and play the first word
+        populateVoiceList();
+        if (typeof speechSynthesis !== 'undefined') {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
         playWord();
-    }
-});
-
-document.getElementById('repeatButton').addEventListener('click', () => {
-    playWord();
-});
-
-document.getElementById('nextButton').addEventListener('click', () => {
-    if (currentIndex < words.length - 1) {
-        currentIndex++;
-        playWord();
-    }
-});
-
-// Load voices and play the first word
-populateVoiceList();
-if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.onvoiceschanged = populateVoiceList;
-}
-playWord();
-
-
     </script>
 </body>
 </html>
