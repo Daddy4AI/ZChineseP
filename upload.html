@@ -49,7 +49,7 @@
         <h1>Upload CSV Files to Firebase</h1>
 
         <h2>Upload Word Lists</h2>
-        <input type="file" id="wordListsFileInput" accept=".csv">
+        <input type="file" id="wordlistsFileInput" accept=".csv"> <!-- ID must be all lowercase -->
         <button id="uploadWordListsButton">Upload Word Lists</button>
         <div class="progress-container">
             <div id="wordListsProgress" class="progress-bar"></div>
@@ -57,7 +57,7 @@
         <p id="wordListsStatus"></p>
 
         <h2>Upload Categories</h2>
-        <input type="file" id="categoriesFileInput" accept=".csv">
+        <input type="file" id="categoriesFileInput" accept=".csv"> <!-- ID must be all lowercase -->
         <button id="uploadCategoriesButton">Upload Categories</button>
         <div class="progress-container">
             <div id="categoriesProgress" class="progress-bar"></div>
@@ -65,7 +65,7 @@
         <p id="categoriesStatus"></p>
 
         <h2>Upload Words</h2>
-        <input type="file" id="wordsFileInput" accept=".csv">
+        <input type="file" id="wordsFileInput" accept=".csv"> <!-- ID must be all lowercase -->
         <button id="uploadWordsButton">Upload Words</button>
         <div class="progress-container">
             <div id="wordsProgress" class="progress-bar"></div>
@@ -75,7 +75,7 @@
 
     <!-- Footer with version information -->
     <footer>
-        Version 0003
+        Version 0001
     </footer>
 
     <!-- Load Firebase SDKs and initialize after DOM -->
@@ -94,7 +94,7 @@
         }
 
         function uploadCSVFile(refPath, progressBarId, statusId) {
-            const fileInput = document.getElementById(refPath.toLowerCase() + 'FileInput');
+            const fileInput = document.getElementById(refPath.toLowerCase() + 'FileInput'); // Matches with HTML IDs
             
             if (!fileInput) {
                 console.error(`No element found with ID ${refPath.toLowerCase() + 'FileInput'}`);
