@@ -83,7 +83,7 @@
     </main>
 
     <footer>
-        Version 0001
+        Version 0003
     </footer>
 
     <script type="module">
@@ -94,23 +94,26 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+
         // Populate the Wordlist dropdown from Firebase
         const wordlistSelect = document.getElementById('wordlistSelect');
         get(ref(database, 'WordLists')).then((snapshot) => {
             if (snapshot.exists()) {
                 const wordlists = snapshot.val();
-                for (const key in wordlists) {
-                    const option = document.createElement('option');
-                    option.value = wordlists[key].list_id;
-                    option.textContent = wordlists[key].list_name;
-                    wordlistSelect.appendChild(option);
-                }
-            } else {
-                console.error("No wordlists available");
-            }
+                console.log('Fetched WordLists:', wordlists); // Debugging line
+               for (const key in wordlists) {
+                   const option = document.createElement('option');
+                   option.value = wordlists[key].list_id;
+                   option.textContent = wordlists[key].list_name;
+                  wordlistSelect.appendChild(option);
+              }
+           } else {
+           console.error("No wordlists available");
+       }
         }).catch((error) => {
-            console.error(error);
+            console.error('Error fetching WordLists:', error); // Debugging line
         });
+
 
         // Populate the Categories checkboxes from Firebase
         const categoriesCheckboxes = document.getElementById('categoriesCheckboxes');
