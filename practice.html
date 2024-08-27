@@ -29,6 +29,10 @@
             margin-bottom: 10px;
         }
 
+        .voice-selection {
+            margin-bottom: 15px;
+        }
+
         .controls {
             display: flex;
             gap: 20px;
@@ -49,12 +53,18 @@
 </head>
 <body>
 
+    <div class="voice-selection">
+        <label for="voiceSelect">选择发音：</label>
+        <select id="voiceSelect"></select>
+    </div>
+
     <div class="word-container">
         <h2 id="wordDisplay">Loading...</h2>
     </div>
 
     <div class="controls">
         <button id="prevButton">Previous</button>
+        <button id="repeatButton">Repeat</button>
         <button id="nextButton">Next</button>
     </div>
 
@@ -65,8 +75,18 @@
     <script>
         let words = JSON.parse(sessionStorage.getItem('filteredWords')) || [];
         let currentIndex = 0;
-
         const wordDisplay = document.getElementById('wordDisplay');
+        const voiceSelect = document.getElementById('voiceSelect');
+
+        function populateVoiceList() {
+            const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+        }
 
         function playWord() {
             if (words.length > 0 && words[currentIndex]) {
@@ -74,7 +94,11 @@
                 wordDisplay.textContent = wordText;
 
                 const utterance = new SpeechSynthesisUtterance(wordText);
-                utterance.lang = 'zh-TW';  // Set language to Traditional Chinese
+                const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+                utterance.lang = 'zh-TW';
                 speechSynthesis.speak(utterance);
             } else {
                 wordDisplay.textContent = "No words available";
@@ -88,6 +112,10 @@
             }
         });
 
+        document.getElementById('repeatButton').addEventListener('click', () => {
+            playWord();
+        });
+
         document.getElementById('nextButton').addEventListener('click', () => {
             if (currentIndex < words.length - 1) {
                 currentIndex++;
@@ -95,7 +123,11 @@
             }
         });
 
-        // Start by playing the first word
+        // Load voices and play the first word
+        populateVoiceList();
+        if (typeof speechSynthesis !== 'undefined') {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
         playWord();
     </script>
 </body>
