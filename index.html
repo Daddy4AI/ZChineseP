@@ -83,7 +83,7 @@
     </main>
 
     <footer>
-        Version 0002
+        Version 0001
     </footer>
 
     <script type="module">
@@ -96,7 +96,7 @@
 
         // Populate the Wordlist dropdown from Firebase
         const wordlistSelect = document.getElementById('wordlistSelect');
-        get(ref(database, 'Wordlists')).then((snapshot) => {
+        get(ref(database, 'WordLists')).then((snapshot) => {
             if (snapshot.exists()) {
                 const wordlists = snapshot.val();
                 for (const key in wordlists) {
