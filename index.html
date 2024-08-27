@@ -58,19 +58,14 @@
         <div class="section">
             <h2>Wordlist Selection （课文选择）</h2>
             <select id="wordlistSelect">
-                <option value="wordlist1">Wordlist 1</option>
-                <option value="wordlist2">Wordlist 2</option>
-                <option value="wordlist3">Wordlist 3</option>
-                <!-- Add more options as needed -->
+                <!-- Options will be populated dynamically from Firebase -->
             </select>
         </div>
 
         <div class="section">
             <h2>Categories Selection （种类选择）</h2>
-            <div class="checkbox-group">
-                <label><input type="checkbox" id="category1" value="category1"> Category 1</label>
-                <label><input type="checkbox" id="category2" value="category2"> Category 2</label>
-                <!-- Add more categories as needed -->
+            <div class="checkbox-group" id="categoriesCheckboxes">
+                <!-- Checkboxes will be populated dynamically from Firebase -->
             </div>
         </div>
 
@@ -88,7 +83,7 @@
     </main>
 
     <footer>
-        Version 0001
+        Version 0002
     </footer>
 
     <script type="module">
@@ -99,21 +94,61 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // Populate the Wordlist dropdown from Firebase
+        const wordlistSelect = document.getElementById('wordlistSelect');
+        get(ref(database, 'Wordlists')).then((snapshot) => {
+            if (snapshot.exists()) {
+                const wordlists = snapshot.val();
+                for (const key in wordlists) {
+                    const option = document.createElement('option');
+                    option.value = wordlists[key].list_id;
+                    option.textContent = wordlists[key].list_name;
+                    wordlistSelect.appendChild(option);
+                }
+            } else {
+                console.error("No wordlists available");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+
+        // Populate the Categories checkboxes from Firebase
+        const categoriesCheckboxes = document.getElementById('categoriesCheckboxes');
+        get(ref(database, 'Categories')).then((snapshot) => {
+            if (snapshot.exists()) {
+                const categories = snapshot.val();
+                for (const key in categories) {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = categories[key].category_id;
+                    checkbox.value = categories[key].category_id;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(categories[key].category_name));
+                    categoriesCheckboxes.appendChild(label);
+                }
+            } else {
+                console.error("No categories available");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+
         document.getElementById('startPracticeButton').addEventListener('click', () => {
-            const selectedWordlist = document.getElementById('wordlistSelect').value;
+            const selectedWordlist = wordlistSelect.value;
             const selectedCategories = [];
-            if (document.getElementById('category1').checked) selectedCategories.push('category1');
-            if (document.getElementById('category2').checked) selectedCategories.push('category2');
+            document.querySelectorAll('#categoriesCheckboxes input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedCategories.push(checkbox.value);
+            });
             const selectedOrder = document.querySelector('input[name="order"]:checked').value;
 
-            // Filter words based on selections
-            const dbRef = ref(database);
-            get(child(dbRef, `Words`)).then((snapshot) => {
+            // Fetch words based on selected wordlist and categories
+            get(ref(database, 'Words')).then((snapshot) => {
                 if (snapshot.exists()) {
                     let words = snapshot.val();
                     let filteredWords = [];
 
-                    // Filter by selected wordlist and categories
+                    // Filter words by selected wordlist and categories
                     filteredWords = Object.values(words).filter(word => {
                         return word.list_id === selectedWordlist && selectedCategories.includes(word.category_id);
                     });
@@ -129,7 +164,7 @@
                     // Navigate to Practice.html
                     window.location.href = 'Practice.html';
                 } else {
-                    console.error("No data available");
+                    console.error("No words available");
                 }
             }).catch((error) => {
                 console.error(error);
