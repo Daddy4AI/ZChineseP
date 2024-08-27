@@ -74,7 +74,7 @@
     </div>
 
     <footer>
-        Version 0001
+        Version 0003
     </footer>
 
     <script>
@@ -104,19 +104,27 @@
             if (words.length > 0 && words[currentIndex]) {
                 const wordText = words[currentIndex].word_text;
                 const utterance = new SpeechSynthesisUtterance(wordText);
-                const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
+                const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
+                const selectedVoice = voices[voiceSelect.value];
+                
                 if (selectedVoice) {
                     utterance.voice = selectedVoice;
+                } else {
+                    console.warn('No valid Chinese voice selected');
                 }
+                
                 utterance.lang = 'zh-CN';
                 utterance.rate = 0.8; // Set playrate to 0.8
-
+                
                 const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
                 wordDisplay.textContent = wordInfo;
-
+                
+                console.log(`Playing word: ${wordText} (${wordInfo})`); // Debugging line
+                
                 speechSynthesis.speak(utterance);
             } else {
                 wordDisplay.textContent = "No words available";
+                console.warn('No words available to speak');
             }
         }
 
