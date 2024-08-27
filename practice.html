@@ -80,14 +80,20 @@
 
         function populateVoiceList() {
     const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
-    console.log('Available voices:', voices); // Debugging line
-    voiceSelect.innerHTML = ''; // Clear previous options
-    voices.forEach((voice, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = `${voice.name} (${voice.lang})`;
-        voiceSelect.appendChild(option);
-    });
+    
+    if (voices.length === 0) {
+        console.warn('No Chinese voices available');
+        voiceSelect.innerHTML = '<option>No Chinese voices available</option>';
+    } else {
+        console.log('Available voices:', voices);
+        voiceSelect.innerHTML = ''; // Clear previous options
+        voices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${voice.name} (${voice.lang})`;
+            voiceSelect.appendChild(option);
+        });
+    }
 }
 
 function playWord() {
@@ -96,19 +102,20 @@ function playWord() {
         wordDisplay.textContent = wordText;
 
         const utterance = new SpeechSynthesisUtterance(wordText);
-        const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
+        const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
+        const selectedVoice = voices[voiceSelect.value];
         if (selectedVoice) {
             utterance.voice = selectedVoice;
-            console.log('Selected voice:', selectedVoice); // Debugging line
+            console.log('Selected voice:', selectedVoice);
         } else {
-            console.warn('No voice selected'); // Debugging line
+            console.warn('No valid Chinese voice selected');
         }
         utterance.lang = 'zh-TW';
-        console.log('Speaking:', wordText); // Debugging line
+        console.log('Speaking:', wordText);
         speechSynthesis.speak(utterance);
     } else {
         wordDisplay.textContent = "No words available";
-        console.warn('No words available to speak'); // Debugging line
+        console.warn('No words available to speak');
     }
 }
 
@@ -136,6 +143,7 @@ if (typeof speechSynthesis !== 'undefined') {
     speechSynthesis.onvoiceschanged = populateVoiceList;
 }
 playWord();
+
 
     </script>
 </body>
