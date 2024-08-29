@@ -110,31 +110,33 @@
         }
 
         function playWord() {
-
             // Cancel any ongoing speech synthesis
             speechSynthesis.cancel();
-            console.log("Speech canceled");
-
+            
             if (words.length > 0 && words[currentIndex]) {
                 const wordText = words[currentIndex].word_text;
                 const utterance = new SpeechSynthesisUtterance(wordText);
+                
                 const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
                 if (selectedVoice) {
                     utterance.voice = selectedVoice;
+                    utterance.lang = selectedVoice.lang;
+                } else {
+                    utterance.lang = 'zh-CN';
                 }
-                utterance.lang = 'zh-CN';
+                
                 utterance.rate = 0.8; // Set playrate to 0.8
 
                 const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
                 wordDisplay.textContent = wordInfo;
 
+                // Start the speech synthesis
                 speechSynthesis.speak(utterance);
             } else {
                 wordDisplay.textContent = "No words available";
             }
         }
 
-        
         document.getElementById('prevButton').addEventListener('click', () => {
             if (currentIndex > 0) {
                 currentIndex--;
