@@ -8,11 +8,17 @@
         body {
             margin: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
         }
 
         .word-container {
@@ -42,6 +48,9 @@
         .controls {
             text-align: center;
             margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
         }
 
         button {
@@ -51,6 +60,8 @@
     </style>
 </head>
 <body>
+
+    <h1>錯誤的單詞一定要全對哦</h1>
 
     <div class="word-container">
         <div class="column" id="column1"></div>
