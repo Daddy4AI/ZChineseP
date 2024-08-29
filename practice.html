@@ -29,10 +29,6 @@
             margin-bottom: 10px;
         }
 
-        .voice-selection {
-            margin-bottom: 15px;
-        }
-
         .controls {
             display: flex;
             gap: 20px;
@@ -65,81 +61,26 @@
 </head>
 <body>
 
-    <div class="voice-selection">
-        <label for="voiceSelect">选择发音：</label>
-        <select id="voiceSelect"></select>
-    </div>
-
     <div class="word-container">
         <h2 id="wordDisplay">Loading...</h2>
     </div>
 
     <div class="controls">
-        <button id="prevButton" disabled>上一个</button>
-        <button id="repeatButton" disabled>重复</button>
-        <button id="nextButton" disabled>下一个</button>
+        <button id="prevButton">上一个</button>
+        <button id="repeatButton">重复</button>
+        <button id="nextButton">下一个</button>
     </div>
 
-    <button id="reviewButton" class="review-button" disabled>检查后重新测试</button>
+    <button id="reviewButton" class="review-button">检查后重新测试</button>
 
     <footer>
-        Version 0005
+        Version 0001
     </footer>
 
     <script>
         let words = JSON.parse(sessionStorage.getItem('filteredWords')) || [];
         let currentIndex = 0;
         const wordDisplay = document.getElementById('wordDisplay');
-        const voiceSelect = document.getElementById('voiceSelect');
-
-        // Function to load voices and ensure they are ready before proceeding
-        function loadVoices() {
-            return new Promise((resolve) => {
-                let voices = speechSynthesis.getVoices();
-                if (voices.length !== 0) {
-                    resolve(voices);
-                } else {
-                    speechSynthesis.onvoiceschanged = () => {
-                        voices = speechSynthesis.getVoices();
-                        resolve(voices);
-                    };
-                }
-            });
-        }
-
-        async function initializeVoices() {
-            const voices = await loadVoices();
-
-            const chineseVoices = voices.filter(voice => voice.lang.startsWith('zh'));
-            voiceSelect.innerHTML = ''; // Clear previous options
-
-            if (chineseVoices.length === 0) {
-                console.warn("No Chinese voices available. Please ensure that your browser supports Chinese voices.");
-            }
-
-            chineseVoices.forEach((voice, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${voice.name} (${voice.lang})`;
-                voiceSelect.appendChild(option);
-            });
-
-            const defaultVoice = chineseVoices.find(voice => voice.lang === 'zh-CN');
-            if (defaultVoice) {
-                voiceSelect.value = chineseVoices.indexOf(defaultVoice);
-                console.log("Default Chinese voice selected:", defaultVoice.name);
-            } else {
-                console.warn("Default Chinese voice not found, using first available Chinese voice.");
-            }
-
-            document.getElementById('prevButton').disabled = false;
-            document.getElementById('repeatButton').disabled = false;
-            document.getElementById('nextButton').disabled = false;
-            document.getElementById('reviewButton').disabled = false;
-
-            // Now that voices are ready, start playing the first word
-            playWord();
-        }
 
         function playWord() {
             // Cancel any ongoing speech synthesis
@@ -150,17 +91,8 @@
                 const wordText = words[currentIndex].word_text;
                 const utterance = new SpeechSynthesisUtterance(wordText);
 
-                const voices = speechSynthesis.getVoices();
-                const selectedVoice = voices[voiceSelect.value];
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
-                    utterance.lang = selectedVoice.lang;
-                    console.log("Selected voice:", selectedVoice.name);
-                } else {
-                    console.warn("Selected voice not found, using default.");
-                    utterance.lang = 'zh-CN';
-                }
-                
+                // Set voice to zh-CN
+                utterance.lang = 'zh-CN';
                 utterance.rate = 0.8; // Set playrate to 0.8
 
                 const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
@@ -201,8 +133,8 @@
             window.location.href = 'review.html';
         });
 
-        // Initialize voices and then start the first word
-        initializeVoices();
+        // Start playing the first word
+        playWord();
     </script>
 </body>
 </html>
