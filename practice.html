@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>默寫開始,這個學期8個100份</title>
+    <title>Practice Session</title>
     <style>
         body {
             margin: 0;
@@ -36,11 +36,18 @@
         .controls {
             display: flex;
             gap: 20px;
+            margin-bottom: 20px;
         }
 
         button {
             font-size: 2em;
             padding: 10px 20px;
+        }
+
+        .review-button {
+            font-size: 2em;
+            padding: 10px 20px;
+            margin-top: 10px;
         }
 
         footer {
@@ -71,8 +78,9 @@
         <button id="prevButton">上一个</button>
         <button id="repeatButton">重复</button>
         <button id="nextButton">下一个</button>
-        <button id="reviewButton">检查后重新测试</button>
     </div>
+
+    <button id="reviewButton" class="review-button">检查后重新测试</button>
 
     <footer>
         Version 0001
