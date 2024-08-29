@@ -83,7 +83,7 @@
     <button id="reviewButton" class="review-button">检查后重新测试</button>
 
     <footer>
-        Version 0002
+        Version 0001
     </footer>
 
     <script>
@@ -91,6 +91,9 @@
         let currentIndex = 0;
         const wordDisplay = document.getElementById('wordDisplay');
         const voiceSelect = document.getElementById('voiceSelect');
+
+        // Debug: Log all the words to be played at initial load
+        console.log("Words to be played:", words.map((word, index) => `${index + 1}: ${word.word_text}`));
 
         function populateVoiceList() {
             const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
@@ -112,7 +115,7 @@
         function playWord() {
             // Cancel any ongoing speech synthesis
             speechSynthesis.cancel();
-            
+
             if (words.length > 0 && words[currentIndex]) {
                 const wordText = words[currentIndex].word_text;
                 const utterance = new SpeechSynthesisUtterance(wordText);
@@ -129,6 +132,9 @@
 
                 const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
                 wordDisplay.textContent = wordInfo;
+
+                // Debug: Log the word being played
+                console.log(`Playing word ${currentIndex + 1}: ${wordText}`);
 
                 // Start the speech synthesis
                 speechSynthesis.speak(utterance);
