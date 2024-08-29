@@ -113,35 +113,42 @@
         }
 
         function playWord() {
-            // Cancel any ongoing speech synthesis
-            speechSynthesis.cancel();
+    // Cancel any ongoing speech synthesis
+    speechSynthesis.cancel();
+    console.log("Speech synthesis canceled");
 
-            if (words.length > 0 && words[currentIndex]) {
-                const wordText = words[currentIndex].word_text;
-                const utterance = new SpeechSynthesisUtterance(wordText);
-                
-                const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
-                    utterance.lang = selectedVoice.lang;
-                } else {
-                    utterance.lang = 'zh-CN';
-                }
-                
-                utterance.rate = 0.8; // Set playrate to 0.8
+    if (words.length > 0 && words[currentIndex]) {
+        const wordText = words[currentIndex].word_text;
+        const utterance = new SpeechSynthesisUtterance(wordText);
 
-                const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
-                wordDisplay.textContent = wordInfo;
-
-                // Debug: Log the word being played
-                console.log(`Playing word ${currentIndex + 1}: ${wordText}`);
-
-                // Start the speech synthesis
-                speechSynthesis.speak(utterance);
-            } else {
-                wordDisplay.textContent = "No words available";
-            }
+        const voices = speechSynthesis.getVoices();
+        const selectedVoice = voices[voiceSelect.value];
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            utterance.lang = selectedVoice.lang;
+            console.log("Selected voice:", selectedVoice.name);
+        } else {
+            utterance.lang = 'zh-CN';
         }
+        
+        utterance.rate = 0.8; // Set playrate to 0.8
+
+        const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
+        wordDisplay.textContent = wordInfo;
+
+        // Debug: Log the word being played
+        console.log(`Playing word ${currentIndex + 1}: ${wordText}`);
+
+        // Force a small delay to ensure the speech synthesis is reset
+        setTimeout(() => {
+            speechSynthesis.speak(utterance);
+            console.log("Speech synthesis started");
+        }, 100); // Delay of 100ms
+    } else {
+        wordDisplay.textContent = "No words available";
+        console.warn("No words available to play");
+    }
+}
 
         document.getElementById('prevButton').addEventListener('click', () => {
             if (currentIndex > 0) {
