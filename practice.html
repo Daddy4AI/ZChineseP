@@ -83,7 +83,7 @@
     <button id="reviewButton" class="review-button">检查后重新测试</button>
 
     <footer>
-        Version 0003
+        Version 0001
     </footer>
 
     <script>
@@ -92,74 +92,77 @@
         const wordDisplay = document.getElementById('wordDisplay');
         const voiceSelect = document.getElementById('voiceSelect');
 
-        // Debug: Log all the words to be played at initial load
-        console.log("Words to be played:", words.map((word, index) => `${index + 1}: ${word.word_text}`));
-
-
         function populateVoiceList() {
-        const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
-        voiceSelect.innerHTML = ''; // Clear previous options
+            let voices = speechSynthesis.getVoices();
 
-        if (voices.length === 0) {
-            console.warn("No Chinese voices available. Please ensure that your browser supports Chinese voices.");
+            if (!voices.length) {
+                console.warn("No voices available initially. Waiting for voices to load...");
+                speechSynthesis.onvoiceschanged = populateVoiceList; // Retry voice loading when they change
+                return;
+            }
+
+            voices = voices.filter(voice => voice.lang.startsWith('zh'));
+            voiceSelect.innerHTML = ''; // Clear previous options
+
+            if (voices.length === 0) {
+                console.warn("No Chinese voices available. Please ensure that your browser supports Chinese voices.");
+            }
+
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${voice.name} (${voice.lang})`;
+                voiceSelect.appendChild(option);
+            });
+
+            // Set default voice to Chinese (Mainland China)
+            const defaultVoice = voices.find(voice => voice.lang === 'zh-CN');
+            if (defaultVoice) {
+                voiceSelect.value = voices.indexOf(defaultVoice);
+                console.log("Default Chinese voice selected:", defaultVoice.name);
+            } else {
+                console.warn("Default Chinese voice not found, using first available Chinese voice.");
+            }
         }
 
-        voices.forEach((voice, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = `${voice.name} (${voice.lang})`;
-            voiceSelect.appendChild(option);
-        });
+        function playWord() {
+            // Cancel any ongoing speech synthesis
+            speechSynthesis.cancel();
+            console.log("Speech synthesis canceled");
 
-        // Set default voice to Chinese (Mainland China)
-        const defaultVoice = voices.find(voice => voice.lang === 'zh-CN');
-        if (defaultVoice) {
-            voiceSelect.value = voices.indexOf(defaultVoice);
-            console.log("Default Chinese voice selected:", defaultVoice.name);
-        } else {
-            console.warn("Default Chinese voice not found, using first available Chinese voice.");
-        }  
-    }
+            if (words.length > 0 && words[currentIndex]) {
+                const wordText = words[currentIndex].word_text;
+                const utterance = new SpeechSynthesisUtterance(wordText);
 
+                const voices = speechSynthesis.getVoices();
+                const selectedVoice = voices[voiceSelect.value];
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                    utterance.lang = selectedVoice.lang;
+                    console.log("Selected voice:", selectedVoice.name);
+                } else {
+                    console.warn("Selected voice not found, using default.");
+                    utterance.lang = 'zh-CN';
+                }
+                
+                utterance.rate = 0.8; // Set playrate to 0.8
 
-    function playWord() {
-    // Cancel any ongoing speech synthesis
-    speechSynthesis.cancel();
-    console.log("Speech synthesis canceled");
+                const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
+                wordDisplay.textContent = wordInfo;
 
-    if (words.length > 0 && words[currentIndex]) {
-        const wordText = words[currentIndex].word_text;
-        const utterance = new SpeechSynthesisUtterance(wordText);
+                // Debug: Log the word being played
+                console.log(`Playing word ${currentIndex + 1}: ${wordText}`);
 
-        const voices = speechSynthesis.getVoices();
-        const selectedVoice = voices[voiceSelect.value];
-        if (selectedVoice) {
-            utterance.voice = selectedVoice;
-            utterance.lang = selectedVoice.lang;
-            console.log("Selected voice:", selectedVoice.name);
-        } else {
-            console.warn("Selected voice not found, using default.");
-            utterance.lang = 'zh-CN';
+                // Force a small delay to ensure the speech synthesis is reset
+                setTimeout(() => {
+                    speechSynthesis.speak(utterance);
+                    console.log("Speech synthesis started");
+                }, 100); // Delay of 100ms
+            } else {
+                wordDisplay.textContent = "No words available";
+                console.warn("No words available to play");
+            }
         }
-        
-        utterance.rate = 0.8; // Set playrate to 0.8
-
-        const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
-        wordDisplay.textContent = wordInfo;
-
-        // Debug: Log the word being played
-        console.log(`Playing word ${currentIndex + 1}: ${wordText}`);
-
-        // Force a small delay to ensure the speech synthesis is reset
-        setTimeout(() => {
-            speechSynthesis.speak(utterance);
-            console.log("Speech synthesis started");
-        }, 100); // Delay of 100ms
-    } else {
-        wordDisplay.textContent = "No words available";
-        console.warn("No words available to play");
-    }
-}
 
         document.getElementById('prevButton').addEventListener('click', () => {
             if (currentIndex > 0) {
