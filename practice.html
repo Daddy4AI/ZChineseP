@@ -110,6 +110,11 @@
         }
 
         function playWord() {
+
+            // Cancel any ongoing speech synthesis
+            speechSynthesis.cancel();
+            console.log("Speech canceled");
+
             if (words.length > 0 && words[currentIndex]) {
                 const wordText = words[currentIndex].word_text;
                 const utterance = new SpeechSynthesisUtterance(wordText);
@@ -129,6 +134,7 @@
             }
         }
 
+        
         document.getElementById('prevButton').addEventListener('click', () => {
             if (currentIndex > 0) {
                 currentIndex--;
