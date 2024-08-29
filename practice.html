@@ -157,7 +157,7 @@
                 setTimeout(() => {
                     speechSynthesis.speak(utterance);
                     console.log("Speech synthesis started");
-                }, 100); // Delay of 100ms
+                }, 500); // Longer delay of 500ms
             } else {
                 wordDisplay.textContent = "No words available";
                 console.warn("No words available to play");
@@ -191,7 +191,11 @@
         if (typeof speechSynthesis !== 'undefined') {
             speechSynthesis.onvoiceschanged = populateVoiceList;
         }
-        playWord();
+
+        // Ensure correct voice is selected before first word
+        setTimeout(() => {
+            playWord();
+        }, 1000); // Longer delay of 1000ms for initial load
     </script>
 </body>
 </html>
