@@ -91,57 +91,57 @@
         let currentIndex = 0;
         const wordDisplay = document.getElementById('wordDisplay');
         const voiceSelect = document.getElementById('voiceSelect');
-        let voicesReady = false;
 
-        function populateVoiceList() {
-            let voices = speechSynthesis.getVoices();
+        // Function to load voices and ensure they are ready before proceeding
+        function loadVoices() {
+            return new Promise((resolve) => {
+                let voices = speechSynthesis.getVoices();
+                if (voices.length !== 0) {
+                    resolve(voices);
+                } else {
+                    speechSynthesis.onvoiceschanged = () => {
+                        voices = speechSynthesis.getVoices();
+                        resolve(voices);
+                    };
+                }
+            });
+        }
 
-            if (!voices.length) {
-                console.warn("No voices available initially. Waiting for voices to load...");
-                speechSynthesis.onvoiceschanged = populateVoiceList;
-                return;
-            }
+        async function initializeVoices() {
+            const voices = await loadVoices();
 
-            voices = voices.filter(voice => voice.lang.startsWith('zh'));
+            const chineseVoices = voices.filter(voice => voice.lang.startsWith('zh'));
             voiceSelect.innerHTML = ''; // Clear previous options
 
-            if (voices.length === 0) {
+            if (chineseVoices.length === 0) {
                 console.warn("No Chinese voices available. Please ensure that your browser supports Chinese voices.");
             }
 
-            voices.forEach((voice, index) => {
+            chineseVoices.forEach((voice, index) => {
                 const option = document.createElement('option');
                 option.value = index;
                 option.textContent = `${voice.name} (${voice.lang})`;
                 voiceSelect.appendChild(option);
             });
 
-            const defaultVoice = voices.find(voice => voice.lang === 'zh-CN');
+            const defaultVoice = chineseVoices.find(voice => voice.lang === 'zh-CN');
             if (defaultVoice) {
-                voiceSelect.value = voices.indexOf(defaultVoice);
+                voiceSelect.value = chineseVoices.indexOf(defaultVoice);
                 console.log("Default Chinese voice selected:", defaultVoice.name);
             } else {
                 console.warn("Default Chinese voice not found, using first available Chinese voice.");
             }
 
-            // Enable controls and set voicesReady to true
             document.getElementById('prevButton').disabled = false;
             document.getElementById('repeatButton').disabled = false;
             document.getElementById('nextButton').disabled = false;
             document.getElementById('reviewButton').disabled = false;
-            voicesReady = true;
 
-            // Start playback after voices are ready
+            // Now that voices are ready, start playing the first word
             playWord();
         }
 
         function playWord() {
-            if (!voicesReady) {
-                console.log("Voices not ready yet, delaying playback...");
-                setTimeout(playWord, 500);
-                return;
-            }
-
             // Cancel any ongoing speech synthesis
             speechSynthesis.cancel();
             console.log("Speech synthesis canceled");
@@ -172,7 +172,7 @@
                 setTimeout(() => {
                     speechSynthesis.speak(utterance);
                     console.log("Speech synthesis started");
-                }, 500); // Longer delay of 500ms
+                }, 500); // Slight delay to ensure speech synthesis starts correctly
             } else {
                 wordDisplay.textContent = "No words available";
                 console.warn("No words available to play");
@@ -201,8 +201,8 @@
             window.location.href = 'review.html';
         });
 
-        // Load voices
-        populateVoiceList();
+        // Initialize voices and then start the first word
+        initializeVoices();
     </script>
 </body>
 </html>
