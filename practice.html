@@ -71,6 +71,7 @@
         <button id="prevButton">上一个</button>
         <button id="repeatButton">重复</button>
         <button id="nextButton">下一个</button>
+        <button id="reviewButton">检查后重新测试</button>
     </div>
 
     <footer>
@@ -104,27 +105,19 @@
             if (words.length > 0 && words[currentIndex]) {
                 const wordText = words[currentIndex].word_text;
                 const utterance = new SpeechSynthesisUtterance(wordText);
-                const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('zh'));
-                const selectedVoice = voices[voiceSelect.value];
-                
+                const selectedVoice = speechSynthesis.getVoices()[voiceSelect.value];
                 if (selectedVoice) {
                     utterance.voice = selectedVoice;
-                } else {
-                    console.warn('No valid Chinese voice selected');
                 }
-                
                 utterance.lang = 'zh-CN';
-                utterance.rate = 0.6; // Set playrate to 0.8
-                
+                utterance.rate = 0.8; // Set playrate to 0.8
+
                 const wordInfo = `总共${words.length}个单词中的第${currentIndex + 1}个词语`;
                 wordDisplay.textContent = wordInfo;
-                
-                console.log(`Playing word: ${wordText} (${wordInfo})`); // Debugging line
-                
+
                 speechSynthesis.speak(utterance);
             } else {
                 wordDisplay.textContent = "No words available";
-                console.warn('No words available to speak');
             }
         }
 
@@ -144,6 +137,10 @@
                 currentIndex++;
                 playWord();
             }
+        });
+
+        document.getElementById('reviewButton').addEventListener('click', () => {
+            window.location.href = 'review.html';
         });
 
         // Load voices and play the first word

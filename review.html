@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Words</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .category-container {
+            margin: 20px 0;
+            width: 80%;
+        }
+
+        .category-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .word-item {
+            flex: 1 0 30%;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .word-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .controls {
+            margin: 20px;
+        }
+
+        button {
+            font-size: 1.5em;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>检查后重新测试</h1>
+
+    <div id="wordCategories"></div>
+
+    <div class="controls">
+        <button id="startReviewButton">开始复习</button>
+    </div>
+
+    <script>
+        const words = JSON.parse(sessionStorage.getItem('filteredWords')) || [];
+        const wordCategoriesContainer = document.getElementById('wordCategories');
+
+        function groupWordsByCategory(words) {
+            const categories = {};
+            words.forEach(word => {
+                if (!categories[word.category_name]) {
+                    categories[word.category_name] = [];
+                }
+                categories[word.category_name].push(word);
+            });
+            return categories;
+        }
+
+        function renderWordCategories(categories) {
+            wordCategoriesContainer.innerHTML = '';
+            for (const category in categories) {
+                const categoryContainer = document.createElement('div');
+                categoryContainer.className = 'category-container';
+
+                const categoryTitle = document.createElement('h2');
+                categoryTitle.className = 'category-title';
+                categoryTitle.textContent = category;
+                categoryContainer.appendChild(categoryTitle);
+
+                const wordList = document.createElement('div');
+                wordList.className = 'word-list';
+
+                categories[category].forEach(word => {
+                    const wordItem = document.createElement('div');
+                    wordItem.className = 'word-item';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = word.word_id;
+                    wordItem.appendChild(checkbox);
+
+                    const wordLabel = document.createElement('span');
+                    wordLabel.textContent = word.word_text;
+                    wordItem.appendChild(wordLabel);
+
+                    wordList.appendChild(wordItem);
+                });
+
+                categoryContainer.appendChild(wordList);
+                wordCategoriesContainer.appendChild(categoryContainer);
+            }
+        }
+
+        document.getElementById('startReviewButton').addEventListener('click', () => {
+            const selectedWordIds = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            const reviewList = words.filter(word => selectedWordIds.includes(word.word_id));
+            sessionStorage.setItem('filteredWords', JSON.stringify(reviewList));
+            window.location.href = 'Practice.html';
+        });
+
+        const categorizedWords = groupWordsByCategory(words);
+        renderWordCategories(categorizedWords);
+    </script>
+</body>
+</html>
