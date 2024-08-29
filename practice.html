@@ -75,15 +75,15 @@
     </div>
 
     <div class="controls">
-        <button id="prevButton">上一个</button>
-        <button id="repeatButton">重复</button>
-        <button id="nextButton">下一个</button>
+        <button id="prevButton" disabled>上一个</button>
+        <button id="repeatButton" disabled>重复</button>
+        <button id="nextButton" disabled>下一个</button>
     </div>
 
-    <button id="reviewButton" class="review-button">检查后重新测试</button>
+    <button id="reviewButton" class="review-button" disabled>检查后重新测试</button>
 
     <footer>
-        Version 0003
+        Version 0001
     </footer>
 
     <script>
@@ -91,13 +91,14 @@
         let currentIndex = 0;
         const wordDisplay = document.getElementById('wordDisplay');
         const voiceSelect = document.getElementById('voiceSelect');
+        let voicesReady = false;
 
         function populateVoiceList() {
             let voices = speechSynthesis.getVoices();
 
             if (!voices.length) {
                 console.warn("No voices available initially. Waiting for voices to load...");
-                speechSynthesis.onvoiceschanged = populateVoiceList; // Retry voice loading when they change
+                speechSynthesis.onvoiceschanged = populateVoiceList;
                 return;
             }
 
@@ -115,7 +116,6 @@
                 voiceSelect.appendChild(option);
             });
 
-            // Set default voice to Chinese (Mainland China)
             const defaultVoice = voices.find(voice => voice.lang === 'zh-CN');
             if (defaultVoice) {
                 voiceSelect.value = voices.indexOf(defaultVoice);
@@ -123,9 +123,25 @@
             } else {
                 console.warn("Default Chinese voice not found, using first available Chinese voice.");
             }
+
+            // Enable controls and set voicesReady to true
+            document.getElementById('prevButton').disabled = false;
+            document.getElementById('repeatButton').disabled = false;
+            document.getElementById('nextButton').disabled = false;
+            document.getElementById('reviewButton').disabled = false;
+            voicesReady = true;
+
+            // Start playback after voices are ready
+            playWord();
         }
 
         function playWord() {
+            if (!voicesReady) {
+                console.log("Voices not ready yet, delaying playback...");
+                setTimeout(playWord, 500);
+                return;
+            }
+
             // Cancel any ongoing speech synthesis
             speechSynthesis.cancel();
             console.log("Speech synthesis canceled");
@@ -153,7 +169,6 @@
                 // Debug: Log the word being played
                 console.log(`Playing word ${currentIndex + 1}: ${wordText}`);
 
-                // Force a small delay to ensure the speech synthesis is reset
                 setTimeout(() => {
                     speechSynthesis.speak(utterance);
                     console.log("Speech synthesis started");
@@ -186,16 +201,8 @@
             window.location.href = 'review.html';
         });
 
-        // Load voices and play the first word
+        // Load voices
         populateVoiceList();
-        if (typeof speechSynthesis !== 'undefined') {
-            speechSynthesis.onvoiceschanged = populateVoiceList;
-        }
-
-        // Ensure correct voice is selected before first word
-        setTimeout(() => {
-            playWord();
-        }, 1000); // Longer delay of 1000ms for initial load
     </script>
 </body>
 </html>
