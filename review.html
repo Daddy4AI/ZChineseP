@@ -117,7 +117,7 @@
 
             const reviewList = words.filter(word => selectedWordIds.includes(word.word_id));
             sessionStorage.setItem('filteredWords', JSON.stringify(reviewList));
-            window.location.href = 'Practice.html';
+            window.location.href = 'practice.html';
         });
 
         const categorizedWords = groupWordsByCategory(words);
