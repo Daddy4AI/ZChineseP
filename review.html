@@ -28,9 +28,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 50vh;
+            height: 40vh;
             width: 80%;
-            font-size: 120px;
+            font-size: 100px;
             text-align: center;
         }
 
@@ -128,7 +128,9 @@
             const selectedWord = words[currentIndex];
 
             if (event.target.checked) {
-                reviewList.push(selectedWord);
+                if (!reviewList.some(word => word.word_id === selectedWord.word_id)) {
+                    reviewList.push(selectedWord);
+                }
             } else {
                 reviewList = reviewList.filter(word => word.word_id !== selectedWord.word_id);
             }
