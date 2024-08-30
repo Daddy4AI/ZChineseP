@@ -13,9 +13,30 @@
             font-family: Arial, sans-serif;
         }
 
+        #cover {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('pics/cover.jpg') no-repeat center center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        #cover h1 {
+            font-size: 40px;
+            color: white;
+            text-align: center;
+            margin: 0;
+        }
+
         main {
             flex: 1;
             padding: 20px;
+            display: none; /* Hide main content initially */
         }
 
         .section {
@@ -51,6 +72,10 @@
     </style>
 </head>
 <body>
+
+    <div id="cover">
+        <h1>Z每天默寫全對，保證考試100分</h1>
+    </div>
 
     <main>
         <h1>每天默寫全對，考試肯定100分！</h1>
@@ -94,6 +119,13 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
+        // Cover logic to hide after a delay
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('cover').style.display = 'none';
+                document.querySelector('main').style.display = 'block';
+            }, 3000); // Adjust the timeout duration as needed
+        });
 
         // Populate the Wordlist dropdown from Firebase
         const wordlistSelect = document.getElementById('wordlistSelect');
