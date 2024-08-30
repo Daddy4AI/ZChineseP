@@ -18,44 +18,50 @@
 
         h1 {
             font-size: 2em;
-            margin-bottom: 20px;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
         }
 
         .word-container {
             display: flex;
-            justify-content: center;
-            width: 80%;
-        }
-
-        .column {
-            width: 30%;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        .word-item {
-            display: flex;
+            flex-direction: column;
             align-items: center;
-            font-size: 30px;
-            margin-bottom: 15px;
+            justify-content: center;
+            height: 50vh;
+            width: 80%;
+            font-size: 40px;
+            text-align: center;
         }
 
-        .word-item input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.5); /* Enlarge the checkbox */
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            font-size: 30px;
         }
 
         .controls {
-            text-align: center;
-            margin-top: 20px;
-            width: 100%;
             display: flex;
-            justify-content: center;
+            justify-content: space-around;
+            width: 80%;
+            margin-top: 20px;
         }
 
         button {
             font-size: 1.5em;
             padding: 10px 20px;
+        }
+
+        .start-review-container {
+            margin-top: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .start-review-container button {
+            width: auto;
         }
     </style>
 </head>
@@ -63,51 +69,69 @@
 
     <h1>錯誤的單詞一定要全對哦</h1>
 
-    <div class="word-container">
-        <div class="column" id="column1"></div>
-        <div class="column" id="column2"></div>
-        <div class="column" id="column3"></div>
+    <div class="word-container" id="wordContainer">
+        <!-- Word will be displayed here -->
+    </div>
+
+    <div class="checkbox-container">
+        <input type="checkbox" id="wordCheckbox">
+        <label for="wordCheckbox">竟然錯誤，一定要默寫正確</label>
     </div>
 
     <div class="controls">
+        <button id="prevButton">上一个</button>
+        <button id="nextButton">下一个</button>
+    </div>
+
+    <div class="start-review-container">
         <button id="startReviewButton">开始复习</button>
     </div>
 
     <script>
         const words = JSON.parse(sessionStorage.getItem('filteredWords')) || [];
-        const column1 = document.getElementById('column1');
-        const column2 = document.getElementById('column2');
-        const column3 = document.getElementById('column3');
+        let currentIndex = 0;
+        const wordContainer = document.getElementById('wordContainer');
+        const wordCheckbox = document.getElementById('wordCheckbox');
 
-        function distributeWords(words) {
-            const columnElements = [column1, column2, column3];
-            words.forEach((word, index) => {
-                const wordItem = document.createElement('div');
-                wordItem.className = 'word-item';
-
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = word.word_id;
-                wordItem.appendChild(checkbox);
-
-                const wordLabel = document.createElement('span');
-                wordLabel.textContent = word.word_text;
-                wordItem.appendChild(wordLabel);
-
-                columnElements[index % 3].appendChild(wordItem);
-            });
+        function displayWord() {
+            if (words.length > 0 && words[currentIndex]) {
+                wordContainer.textContent = words[currentIndex].word_text;
+                wordCheckbox.checked = false;
+            } else {
+                wordContainer.textContent = "No words available";
+                wordCheckbox.disabled = true;
+            }
         }
 
-        document.getElementById('startReviewButton').addEventListener('click', () => {
-            const selectedWordIds = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
-                .map(checkbox => checkbox.value);
+        document.getElementById('prevButton').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                displayWord();
+            }
+        });
 
-            const reviewList = words.filter(word => selectedWordIds.includes(word.word_id));
-            sessionStorage.setItem('filteredWords', JSON.stringify(reviewList));
+        document.getElementById('nextButton').addEventListener('click', () => {
+            if (currentIndex < words.length - 1) {
+                currentIndex++;
+                displayWord();
+            }
+        });
+
+        wordCheckbox.addEventListener('change', (event) => {
+            if (event.target.checked) {
+                const selectedWord = words[currentIndex];
+                const reviewList = JSON.parse(sessionStorage.getItem('reviewList')) || [];
+                reviewList.push(selectedWord);
+                sessionStorage.setItem('reviewList', JSON.stringify(reviewList));
+            }
+        });
+
+        document.getElementById('startReviewButton').addEventListener('click', () => {
             window.location.href = 'practice.html';
         });
 
-        distributeWords(words);
+        // Initialize the first word display
+        displayWord();
     </script>
 </body>
 </html>
