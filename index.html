@@ -31,7 +31,7 @@
 
         #cover h1 {
             font-size: 40px;
-            color: black;
+            color: white;
             text-align: center;
             margin: 0;
         }
@@ -122,57 +122,10 @@
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Cover logic to hide after a delay
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('cover').style.display = 'none';
-                document.querySelector('main').style.display = 'block';
-            }, 3000); // Adjust the timeout duration as needed
-        });
-
-        // Populate the Wordlist dropdown from Firebase
-        const wordlistSelect = document.getElementById('wordlistSelect');
-        get(ref(database, 'WordLists')).then((snapshot) => {
-            if (snapshot.exists()) {
-                const wordlists = snapshot.val();
-                console.log('Fetched WordLists:', wordlists); // Debugging line
-               for (const key in wordlists) {
-                   const option = document.createElement('option');
-                   option.value = wordlists[key].list_id;
-                   option.textContent = wordlists[key].list_name;
-                  wordlistSelect.appendChild(option);
-              }
-           } else {
-           console.error("No wordlists available");
-       }
-        }).catch((error) => {
-            console.error('Error fetching WordLists:', error); // Debugging line
-        });
-
-
-        // Populate the Categories checkboxes from Firebase
-        const categoriesCheckboxes = document.getElementById('categoriesCheckboxes');
-        get(ref(database, 'Categories')).then((snapshot) => {
-            if (snapshot.exists()) {
-                const categories = snapshot.val();
-                for (const key in categories) {
-                    const label = document.createElement('label');
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = categories[key].category_id;
-                    checkbox.value = categories[key].category_id;
-                    label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(categories[key].category_name));
-                    categoriesCheckboxes.appendChild(label);
-                }
-            } else {
-                console.error("No categories available");
-            }
-        }).catch((error) => {
-            console.error(error);
-        });
-
+        // Clear reviewList when starting practice
         document.getElementById('startPracticeButton').addEventListener('click', () => {
+            sessionStorage.removeItem('reviewList');
+
             const selectedWordlist = wordlistSelect.value;
             const selectedCategories = [];
             document.querySelectorAll('#categoriesCheckboxes input[type="checkbox"]:checked').forEach(checkbox => {
@@ -208,6 +161,56 @@
                 console.error(error);
             });
         });
+
+        // Cover logic to hide after a delay
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('cover').style.display = 'none';
+                document.querySelector('main').style.display = 'block';
+            }, 3000); // Adjust the timeout duration as needed
+        });
+
+        // Populate the Wordlist dropdown from Firebase
+        const wordlistSelect = document.getElementById('wordlistSelect');
+        get(ref(database, 'WordLists')).then((snapshot) => {
+            if (snapshot.exists()) {
+                const wordlists = snapshot.val();
+                console.log('Fetched WordLists:', wordlists); // Debugging line
+               for (const key in wordlists) {
+                   const option = document.createElement('option');
+                   option.value = wordlists[key].list_id;
+                   option.textContent = wordlists[key].list_name;
+                  wordlistSelect.appendChild(option);
+              }
+           } else {
+           console.error("No wordlists available");
+       }
+        }).catch((error) => {
+            console.error('Error fetching WordLists:', error); // Debugging line
+        });
+
+        // Populate the Categories checkboxes from Firebase
+        const categoriesCheckboxes = document.getElementById('categoriesCheckboxes');
+        get(ref(database, 'Categories')).then((snapshot) => {
+            if (snapshot.exists()) {
+                const categories = snapshot.val();
+                for (const key in categories) {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = categories[key].category_id;
+                    checkbox.value = categories[key].category_id;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(categories[key].category_name));
+                    categoriesCheckboxes.appendChild(label);
+                }
+            } else {
+                console.error("No categories available");
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+
     </script>
 </body>
 </html>
