@@ -34,6 +34,11 @@
             text-align: center;
         }
 
+        .word-index {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
         .checkbox-container {
             display: flex;
             flex-direction: row;
@@ -79,6 +84,10 @@
         <!-- Word will be displayed here -->
     </div>
 
+    <div class="word-index" id="wordIndex">
+        <!-- Word index will be displayed here -->
+    </div>
+
     <div class="checkbox-container">
         <input type="checkbox" id="wordCheckbox">
         <label for="wordCheckbox">繼續復習</label>
@@ -97,11 +106,13 @@
         const words = JSON.parse(sessionStorage.getItem('filteredWords')) || [];
         let currentIndex = 0;
         const wordContainer = document.getElementById('wordContainer');
+        const wordIndex = document.getElementById('wordIndex');
         const wordCheckbox = document.getElementById('wordCheckbox');
 
         function displayWord() {
             if (words.length > 0 && words[currentIndex]) {
                 wordContainer.textContent = words[currentIndex].word_text;
+                wordIndex.textContent = `${currentIndex + 1} of ${words.length}个单词`;
                 wordCheckbox.checked = false;
             } else {
                 wordContainer.textContent = "No words available";
